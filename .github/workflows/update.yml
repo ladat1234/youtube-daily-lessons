@@ -1,0 +1,32 @@
+name: Auto Update YouTube Lessons
+
+on:
+  schedule:
+    # מפעיל את הסקריפט כל לילה בשעה 3:00 לפנות בוקר שעון ישראל (חצות UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # מוסיף כפתור שמאפשר לך להפעיל ידנית מתי שתרצה
+
+permissions:
+  contents: write
+
+jobs:
+  update-lessons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run Python script
+        run: python update_lessons.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add lessons.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update lessons list from YouTube" && git push)
